@@ -1,105 +1,106 @@
 #include <iostream>
-
 using namespace std;
 
+#define MAX 100
 
-struct Node{
-    int data;
-    Node* next;
+// --- STACK IMPLEMENTATION (DO NOT MODIFY) ---
+struct Stack {
+    int arr[MAX];
+    int top;
 };
 
-
-struct Stack{
-    Node* top=nullptr;
-
-    void push(int val){
-        Node* newNode=new Node{val, top};
-        top =newNode;
-    }
-
-    int pop(){
-        if(isEmpty())
-        return -1;
-        int val = top->data;
-        Node* temp = top;
-        top = top->next;
-        delete temp;
-        return val;
-    }
-
-    bool isEmpty(){
-        return top == nullptr;
-        }
-
-    void printStack(){
-        Node* curr=top;
-        while(curr){
-            cout <<curr->data<<" ";
-            curr = curr->next;
-        }
-        cout << endl;
-    }
-};
-
-
-struct Queue{
-    Node* front=nullptr;
-    Node* rear=nullptr;
-
-    void enqueue(int val){
-        Node* newNode = new Node{val, nullptr};
-        if(rear == nullptr){
-            front= rear= newNode;
-            return;
-        }
-        rear->next=newNode;
-        rear = newNode;
-    }
-
-    int dequeue(){
-        if (isEmpty())return -1;
-        int val = front->data;
-        Node* temp = front;
-        front = front->next;
-        if(front == nullptr)rear = nullptr;
-        delete temp;
-        return val;
-    }
-
-    bool isEmpty(){return front == nullptr;}
-};
-
-
-void transferStack(Stack* source,Stack* destination){
-    Queue tempQueue;
-
-    while(!source->isEmpty()){
-        tempQueue.enqueue(source->pop());
-    }
-
-    while(!tempQueue.isEmpty()){
-        destination->push(tempQueue.dequeue());
+void initStack(Stack* s) { s->top = -1; }
+bool isStackEmpty(Stack* s) { return s->top == -1; }
+void push(Stack* s, int val) {
+    if (s->top < MAX - 1) {
+        s->arr[++(s->top)] = val;
     }
 }
-
-int main(){
-    Stack stackA, stackB;
-    int input;
-
-    cout << "Enter 5 integers to push into stackA:"<<endl;
-    for(int i = 0; i < 5; i++){
-        cout<<"Element"<<i + 1<< ": ";
-        cin>>input;
-        stackA.push(input);
+int pop(Stack* s) {
+    if (!isStackEmpty(s)) {
+        return s->arr[(s->top)--];
     }
-    cout<<"\nContents of stackA before transfer (Top to Bottom):";
-    stackA.printStack();
+    return -1; // Error or Empty
+}
+void printStack(Stack* s) {
+    if (isStackEmpty(s)) {
+        cout << "Stack is empty." << endl;
+        return;
+    }
+    cout << "[Top] ";
+    for (int i = s->top; i >= 0; i--) {
+        cout << s->arr[i] << " ";
+    }
+    cout << "[Bottom]" << endl;
+}
 
-    cout<<"Transferring stackA to stackB..."<<endl;
+// --- QUEUE IMPLEMENTATION (DO NOT MODIFY) ---
+struct Queue {
+    int arr[MAX];
+    int front;
+    int rear;
+};
+
+void initQueue(Queue* q) { q->front = -1; q->rear = -1; }
+bool isQueueEmpty(Queue* q) { return q->front == -1 || q->front > q->rear; }
+void enqueue(Queue* q, int val) {
+    if (q->rear < MAX - 1) {
+        if (q->front == -1) q->front = 0;
+        q->arr[++(q->rear)] = val;
+    }
+}
+int dequeue(Queue* q) {
+    if (!isQueueEmpty(q)) {
+        return q->arr[(q->front)++];
+    }
+    return -1; // Error or Empty
+}
+
+// ==========================================
+// LAB TASK: IMPLEMENT THIS FUNCTION
+// ==========================================
+void transferStack(Stack* source, Stack* destination) {
+    
+    Queue tempQueue;
+    initQueue(&tempQueue);
+    
+    
+    while (!isStackEmpty(source)) {
+        int val = pop(source);
+        enqueue(&tempQueue, val);
+    }
+    
+    
+    while (!isQueueEmpty(&tempQueue)) {
+        int val = dequeue(&tempQueue);
+        push(destination, val);
+    }
+}
+// ==========================================
+
+int main() {
+    Stack stackA, stackB;
+    initStack(&stackA);
+    initStack(&stackB);
+
+    cout << "Please enter 5 integers for Stack A:" << endl;
+    for(int i = 0; i < 5; i++) {
+        int val;
+        cin >> val;
+        push(&stackA, val); // Elements pushed one by one
+    }
+
+    cout << "\nOriginal Stack A: ";
+    printStack(&stackA);
+
+    // Call your function
     transferStack(&stackA, &stackB);
 
-    cout<<"Contents of stackB after transfer (Top to Bottom):";
-    stackB.printStack();
+    cout << "After transfer, Stack A: ";
+    printStack(&stackA);
+    
+    cout << "After transfer, Stack B: ";
+    printStack(&stackB);
 
     return 0;
 }
